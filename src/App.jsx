@@ -6,9 +6,9 @@ class App extends Component {
   constructor(){
     super();
     this.state = {
-      currentUser: {name: "Bob"},
+      currentUser: {name: ""},
       messages: [],
-      count:1
+      count:""
     };
   this.addMessage = this.addMessage.bind(this)
   this.addUserName = this.addUserName.bind(this)
@@ -21,10 +21,10 @@ class App extends Component {
       currentUser: {name:newName}
     })
   }
+
   addMessage(content) {
     const newMessage = {type:"postMessage", username:this.state.currentUser.name, content: content}
     this.socket.send(JSON.stringify(newMessage))
-
   }
   render() {
     return (
@@ -44,14 +44,13 @@ class App extends Component {
       const parsedMessage = JSON.parse(event.data);
       const receivedMessage = this.state.messages.concat(parsedMessage)
       if (parsedMessage.type === "incomingMessage") {
-      this.setState({
-        messages: receivedMessage
-      })
+        this.setState({
+          messages: receivedMessage
+        })
       } else if (parsedMessage.type === "postNotification") {
           this.setState({
             messages: receivedMessage
           })
-          console.log("note",this.state.messages);
       } else if (parsedMessage.type === "clientsCount"){
         this.setState({
           count: parsedMessage.content
@@ -59,7 +58,6 @@ class App extends Component {
       }
     }
     });
-    
   }
 }
 export default App;
