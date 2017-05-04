@@ -6,13 +6,15 @@ class MessageList extends Component {
       return < Message 
       key = {index}
       username = {message.username}
-      content = {message.content} />
+      content = {message.content} 
+      type = {message.type}
+      />
     });
 
 
     return (
       <div id="message-list">
-        { messages }
+       <main className="messages"> { messages } </main>
       </div>
    
     );

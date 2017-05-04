@@ -15,13 +15,32 @@ const wss = new SocketServer({ server });
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  const clientsCount = {type: "clientsCount", id: uuid.v1(), username : null, content: wss.clients.size};
+  for(let client of wss.clients) {
+    console.log("here",clientsCount)
+    client.send(JSON.stringify(clientsCount));
+  }
   ws.on('message', function incoming(message) {
+    
     const receivedMessage = JSON.parse(message);
-    const sentMessage = {id: uuid.v1(), username : receivedMessage.username, content: receivedMessage.content};
+    if ( receivedMessage.type === "postMessage"){
+    const sentMessage = {type: "incomingMessage", id: uuid.v1(), username : receivedMessage.username, content: receivedMessage.content};
       for(let client of wss.clients) {
       client.send(JSON.stringify(sentMessage));
+    }
+  } else if (receivedMessage.type === "postNotification") {
+    console.log(receivedMessage.content)
+      const sentNotification = {type: "postNotification",id: uuid.v1(),username:null, "content": receivedMessage.content};
+      for(let client of wss.clients) {
+        client.send(JSON.stringify(sentNotification));
       }
+    }
   });
-
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected')
+     for(let client of wss.clients) {
+    console.log("here",clientsCount)
+    client.send(JSON.stringify(clientsCount));
+  }
+  });
 });

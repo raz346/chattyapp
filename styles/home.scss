@@ -63,6 +63,7 @@
     }
 
     .navbar {
+      display: flex;
       background: tomato;
       border-bottom: 1px solid black;
       height: 60px;
@@ -74,6 +75,7 @@
     }
 
     .navbar-brand {
+      flex-grow: 1;
       color: inherit;
       display: block;
       float: left;

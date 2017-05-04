@@ -7,37 +7,30 @@ class App extends Component {
     super();
     this.state = {
       currentUser: {name: "Bob"},
-      messages: []
+      messages: [],
+      count:1
     };
   this.addMessage = this.addMessage.bind(this)
   this.addUserName = this.addUserName.bind(this)
   }
 
   addUserName(newName) {
-    console.log(name);
-      this.setState({
-        currentUser: {name:newName}
-      })
-      console.log(this.state.currentUser)
-
+    const postNotification = {type: "postNotification",username:null, content: `${this.state.currentUser.name} has change their name to ${newName}`}
+    this.socket.send(JSON.stringify(postNotification))
+    this.setState({
+      currentUser: {name:newName}
+    })
   }
   addMessage(content) {
-    const newMessage = { username:this.state.currentUser.name, content: content}
+    const newMessage = {type:"postMessage", username:this.state.currentUser.name, content: content}
     this.socket.send(JSON.stringify(newMessage))
-    this.socket.onmessage = (event) => {
-      console.log(event.data);
-      const receivedMessage = this.state.messages.concat(JSON.parse(event.data))
-      console.log(receivedMessage);
-      this.setState({
-        messages: receivedMessage
-      })
-    }
+
   }
   render() {
     return (
       <div>
-      <Header />
-      <MessageList  messages={this.state.messages} />
+      <Header clientsCount={this.state.count}/>
+      <MessageList  messages={this.state.messages}/>
       <ChatBar addMessage={this.addMessage} addUserName={this.addUserName} />
       </div>
     );
@@ -47,6 +40,24 @@ class App extends Component {
     this.socket = new WebSocket("ws://0.0.0.0:3001/");
     this.socket.onopen = (event => {
       console.log("connected to the server");
+          this.socket.onmessage = (event) => {
+      const parsedMessage = JSON.parse(event.data);
+      const receivedMessage = this.state.messages.concat(parsedMessage)
+      if (parsedMessage.type === "incomingMessage") {
+      this.setState({
+        messages: receivedMessage
+      })
+      } else if (parsedMessage.type === "postNotification") {
+          this.setState({
+            messages: receivedMessage
+          })
+          console.log("note",this.state.messages);
+      } else if (parsedMessage.type === "clientsCount"){
+        this.setState({
+          count: parsedMessage.content
+        })
+      }
+    }
     });
     
   }
